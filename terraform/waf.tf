@@ -1,5 +1,5 @@
 resource "aws_wafv2_web_acl" "edge_security_acl" {
-  name = "secure-edge-acl-${random_id.id.hex}"
+  name        = "secure-edge-acl-${random_id.id.hex}"
   description = "Enhanced edge security WAF for bot mitigation"
   scope       = "CLOUDFRONT"
 
@@ -13,7 +13,6 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     sampled_requests_enabled   = true
   }
 
-  # Block known bad user-agents
   rule {
     name     = "block-bad-user-agents"
     priority = 0
@@ -30,6 +29,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
         }
         positional_constraint = "CONTAINS"
         search_string         = "BadBot"
+
         text_transformation {
           priority = 0
           type     = "LOWERCASE"
@@ -44,7 +44,6 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Block requests missing Accept-Language
   rule {
     name     = "missing-accept-language"
     priority = 1
@@ -81,7 +80,6 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Block traffic from countries DSG doesn't serve
   rule {
     name     = "geo-block"
     priority = 2
@@ -102,7 +100,6 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Rate limit /login
   rule {
     name     = "rate-limit-login"
     priority = 3
@@ -122,6 +119,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
             }
             positional_constraint = "STARTS_WITH"
             search_string         = "/login"
+
             text_transformation {
               priority = 0
               type     = "LOWERCASE"
@@ -138,7 +136,6 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Custom Header Rule - block requests flagged by Lambda@Edge
   rule {
     name     = "block-lambda-flagged"
     priority = 4
@@ -155,6 +152,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
         }
         positional_constraint = "EXACTLY"
         search_string         = "true"
+
         text_transformation {
           priority = 0
           type     = "LOWERCASE"
