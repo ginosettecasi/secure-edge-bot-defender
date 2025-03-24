@@ -45,7 +45,7 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: test --file=terraform/main.tf
+        args: test terraform/
 
     - name: Snyk Scan - Python
       uses: snyk/actions/python@master
