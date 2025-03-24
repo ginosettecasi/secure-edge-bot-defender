@@ -20,7 +20,7 @@ data "archive_file" "bot_fingerprint" {
 }
 
 resource "aws_lambda_function" "bot_detector" {
-  function_name = "bot-fingerprint-detector"
+  function_name = "bot-fingerprint-detector-${random_id.id.hex}"
   role          = aws_iam_role.lambda_edge_role.arn
   handler       = "bot_fingerprint.lambda_handler"
   runtime       = "python3.11"
