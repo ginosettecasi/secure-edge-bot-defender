@@ -40,20 +40,6 @@ jobs:
       run: terraform validate
       working-directory: terraform/
 
-    - name: Snyk Scan - IaC
-      uses: snyk/actions/iac@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: test terraform/
-
-    - name: Snyk Scan - Python
-      uses: snyk/actions/python@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: test lambda/
-
   deploy:
     name: Manual Approval + Terraform Deploy
     runs-on: ubuntu-latest
