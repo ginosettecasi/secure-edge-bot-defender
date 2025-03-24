@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "lambda_edge_assume_role" {
 }
 
 resource "aws_iam_role" "lambda_edge_role" {
-  name = "lambda-edge-bot-detector-role-${random_id.id.hex}"
+  name               = "lambda-edge-bot-detector-role-${random_id.id.hex}"
   assume_role_policy = data.aws_iam_policy_document.lambda_edge_assume_role.json
 }
 
