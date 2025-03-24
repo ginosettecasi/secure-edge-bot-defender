@@ -1,5 +1,5 @@
-resource "aws_cloudfront_origin_access_identity" "default" {
-  comment = "Access Identity for Secure Edge Project"
+resource "random_id" "id" {
+  byte_length = 4
 }
 
 resource "aws_s3_bucket" "website_bucket" {
@@ -15,13 +15,13 @@ resource "aws_s3_bucket_website_configuration" "website_config" {
   }
 }
 
-resource "random_id" "id" {
-  byte_length = 4
+resource "aws_cloudfront_origin_access_identity" "default" {
+  comment = "Access Identity for Secure Edge Project"
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
   origin {
-    domain_name = aws_s3_bucket.website_bucket.website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.website_config.website_endpoint
     origin_id   = "s3-origin"
 
     custom_origin_config {
@@ -34,7 +34,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "CloudFront CDN with WAF"
+  comment             = "CloudFront CDN with enhanced WAF"
   default_root_object = "index.html"
 
   default_cache_behavior {
@@ -44,6 +44,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 
     forwarded_values {
       query_string = false
+
       cookies {
         forward = "none"
       }
