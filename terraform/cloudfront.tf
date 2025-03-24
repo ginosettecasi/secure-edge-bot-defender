@@ -3,8 +3,8 @@ resource "random_id" "id" {
 }
 
 resource "aws_s3_bucket" "website_bucket" {
-  bucket         = "secure-edge-bucket-${random_id.id.hex}"
-  force_destroy  = true
+  bucket        = "secure-edge-bucket-${random_id.id.hex}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_ownership_controls" "ownership" {
@@ -52,9 +52,10 @@ resource "aws_cloudfront_distribution" "cdn" {
   default_root_object = "index.html"
 
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "s3-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "s3-origin"
+    viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
       query_string = false
@@ -63,8 +64,6 @@ resource "aws_cloudfront_distribution" "cdn" {
         forward = "none"
       }
     }
-
-    viewer_protocol_policy = "redirect-to-https"
   }
 
   restrictions {
