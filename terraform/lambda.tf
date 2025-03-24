@@ -51,3 +51,15 @@ resource "aws_lambda_function" "bot_detector" {
 
   source_code_hash = data.archive_file.bot_fingerprint.output_base64sha256
 }
+
+resource "null_resource" "force_lambda_redeploy" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = "echo 'Forcing Lambda re-deploy...'"
+  }
+
+  depends_on = [aws_lambda_function.bot_detector]
+}
