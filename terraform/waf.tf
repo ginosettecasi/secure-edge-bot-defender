@@ -20,6 +20,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     action {
       block {}
     }
+
     statement {
       byte_match_statement {
         field_to_match {
@@ -35,6 +36,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
         }
       }
     }
+
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "blockBadBots"
@@ -42,32 +44,36 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Block requests missing Accept-Language (bots rarely send this)
+  # Block requests missing Accept-Language
   rule {
     name     = "missing-accept-language"
     priority = 1
     action {
       block {}
     }
+
     statement {
       not_statement {
         statement {
-          byte_match_statement {
+          size_constraint_statement {
+            comparison_operator = "GT"
+            size                = 0
+
             field_to_match {
               single_header {
                 name = "accept-language"
               }
             }
-            positional_constraint = "EXISTS"
-            search_string         = ""
+
             text_transformation {
               priority = 0
-              type     = "LOWERCASE"
+              type     = "NONE"
             }
           }
         }
       }
     }
+
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "missingAcceptLanguage"
@@ -75,18 +81,20 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Block countries (geo match example)
+  # Block traffic from countries DSG doesn't serve
   rule {
     name     = "geo-block"
     priority = 2
     action {
       block {}
     }
+
     statement {
       geo_match_statement {
         country_codes = ["CN", "RU", "KP", "IR"]
       }
     }
+
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "geoBlock"
@@ -101,10 +109,12 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     action {
       block {}
     }
+
     statement {
       rate_based_statement {
         limit              = 100
         aggregate_key_type = "IP"
+
         scope_down_statement {
           byte_match_statement {
             field_to_match {
@@ -120,6 +130,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
         }
       }
     }
+
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "rateLimitLogin"
@@ -127,13 +138,14 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
     }
   }
 
-  # Custom Header Rule - triggered by Lambda@Edge
+  # Custom Header Rule - block requests flagged by Lambda@Edge
   rule {
     name     = "block-lambda-flagged"
     priority = 4
     action {
       block {}
     }
+
     statement {
       byte_match_statement {
         field_to_match {
@@ -149,6 +161,7 @@ resource "aws_wafv2_web_acl" "edge_security_acl" {
         }
       }
     }
+
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "lambdaFlaggedBots"
