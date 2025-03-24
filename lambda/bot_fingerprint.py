@@ -1,6 +1,7 @@
 import json
 import re
 
+
 def lambda_handler(event, context):
     request = event['Records'][0]['cf']['request']
     headers = request['headers']
@@ -34,10 +35,14 @@ def lambda_handler(event, context):
 
     # ✅ Add custom header so WAF can block flagged traffic
     if flagged:
-        request['headers']['x-suspicious-bot'] = [{'key': 'x-suspicious-bot', 'value': 'true'}]
+        request['headers']['x-suspicious-bot'] = [
+            {'key': 'x-suspicious-bot', 'value': 'true'}
+        ]
         print(f"[BLOCK] Bot-like request flagged: {json.dumps(reasons)}")
     else:
-        request['headers']['x-suspicious-bot'] = [{'key': 'x-suspicious-bot', 'value': 'false'}]
+        request['headers']['x-suspicious-bot'] = [
+            {'key': 'x-suspicious-bot', 'value': 'false'}
+        ]
         print("[ALLOW] Legitimate request passed")
 
     return request
