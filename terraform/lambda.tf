@@ -13,6 +13,26 @@ resource "aws_iam_role" "lambda_edge_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_edge_assume_role.json
 }
 
+resource "aws_iam_role_policy" "lambda_logging" {
+  name = "lambda-edge-logging"
+  role = aws_iam_role.lambda_edge_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 data "archive_file" "bot_fingerprint" {
   type        = "zip"
   source_dir  = "${path.module}/../lambda"
