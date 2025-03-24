@@ -1,5 +1,5 @@
 resource "aws_wafv2_web_acl" "edge_security_acl" {
-  name        = "secure-edge-acl"
+  name = "secure-edge-acl-${random_id.id.hex}"
   description = "Enhanced edge security WAF for bot mitigation"
   scope       = "CLOUDFRONT"
 
