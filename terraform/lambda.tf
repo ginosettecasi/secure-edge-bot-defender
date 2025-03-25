@@ -1,3 +1,8 @@
+provider "aws" {
+  alias  = "use1"
+  region = "us-east-1"
+}
+
 data "aws_iam_policy_document" "lambda_edge_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -9,13 +14,15 @@ data "aws_iam_policy_document" "lambda_edge_assume_role" {
 }
 
 resource "aws_iam_role" "lambda_edge_role" {
+  provider           = aws.use1
   name               = "lambda-edge-bot-detector-role-${random_id.id.hex}"
   assume_role_policy = data.aws_iam_policy_document.lambda_edge_assume_role.json
 }
 
 resource "aws_iam_role_policy" "lambda_logging" {
-  name = "lambda-edge-logging"
-  role = aws_iam_role.lambda_edge_role.id
+  provider = aws.use1
+  name     = "lambda-edge-logging"
+  role     = aws_iam_role.lambda_edge_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -40,6 +47,7 @@ data "archive_file" "bot_fingerprint" {
 }
 
 resource "aws_lambda_function" "bot_detector" {
+  provider      = aws.use1
   function_name = "bot-fingerprint-detector-${random_id.id.hex}"
   role          = aws_iam_role.lambda_edge_role.arn
   handler       = "bot_fingerprint.lambda_handler"
